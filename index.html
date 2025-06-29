@@ -1407,6 +1407,101 @@
             border-color: var(--primary-color);
         }
 
+        /* Badges Styles */
+        .badges-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .badges-section {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .badges-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 10px;
+        }
+        
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .badge-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .badge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .badge-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.1);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .badge-card.locked .badge-icon {
+            color: #aaa;
+            background: rgba(0,0,0,0.05);
+        }
+        
+        .badge-card.locked::after {
+            content: '\f023';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #aaa;
+            font-size: 1.2rem;
+        }
+        
+        .badge-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .badge-description {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .badge-date {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        .badge-card.locked .badge-name,
+        .badge-card.locked .badge-description {
+            color: #aaa;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .login-view {
@@ -1434,6 +1529,10 @@
             .nav-item {
                 text-align: left;
                 margin-bottom: 0;
+            }
+            
+            .badges-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
         }
 
@@ -1672,6 +1771,9 @@
                     <div class="dropdown-menu" id="profile-dropdown-menu">
                         <a href="#" class="dropdown-item" data-view="profile">
                             <i class="fa-solid fa-user"></i> Profile
+                        </a>
+                        <a href="#" class="dropdown-item" data-view="badges">
+                            <i class="fa-solid fa-award"></i> Badges
                         </a>
                     </div>
                 </div>
@@ -2675,6 +2777,28 @@
                 </div>
             </div>
             <div id="view-intervention-tools" class="content-view"><h2>Intervention Tools</h2><p>Access professional tools for mental health interventions and support.</p></div>
+            <div id="view-badges" class="content-view">
+                <div class="badges-container">
+                    <header class="page-header">
+                        <h1>Your Achievement Badges</h1>
+                        <p>Earn badges by completing learning modules and participating in peer discussions.</p>
+                    </header>
+
+                    <section class="badges-section">
+                        <h2>Earned Badges</h2>
+                        <div id="earned-badges" class="badges-grid">
+                            <!-- Earned badges will be populated by JavaScript -->
+                        </div>
+                    </section>
+
+                    <section class="badges-section">
+                        <h2>Available Badges</h2>
+                        <div id="available-badges" class="badges-grid">
+                            <!-- Available badges will be populated by JavaScript -->
+                        </div>
+                    </section>
+                </div>
+            </div>
             <div id="view-report" class="content-view">
                 <header class="page-header">
                     <h1>Engagement & Reports</h1>
@@ -3477,6 +3601,26 @@
             const modal = document.getElementById('completion-modal');
             if (modal) {
                 modal.classList.remove('hidden');
+                
+                // Get the current module data
+                const moduleId = document.getElementById('submit-quiz-btn')?.dataset.moduleId;
+                const moduleData = moduleId && modulesData[moduleId];
+                
+                if (moduleData) {
+                    // Calculate score based on selected answers (simplified for demo)
+                    const score = Math.floor(Math.random() * 30) + 70; // Random score between 70-100
+                    
+                    // Dispatch moduleCompleted event for badge system
+                    const moduleCompletedEvent = new CustomEvent('moduleCompleted', {
+                        detail: {
+                            id: moduleData.id,
+                            name: moduleData.title,
+                            score: score,
+                            completedDate: new Date().toISOString()
+                        }
+                    });
+                    document.dispatchEvent(moduleCompletedEvent);
+                }
             }
         }
 
@@ -3956,6 +4100,212 @@
                 `;
             }
         }
+        
+        // Setup badges functionality
+        function setupBadgesFunctionality() {
+            const badgesSection = document.getElementById('view-badges');
+            if (!badgesSection) return;
+            
+            // Define badges data
+            const earnedBadges = [
+                {
+                    id: 'module-master',
+                    name: 'Module Master',
+                    icon: 'fa-solid fa-graduation-cap',
+                    description: 'Completed all learning modules',
+                    earnedDate: '2023-10-15'
+                },
+                {
+                    id: 'discussion-starter',
+                    name: 'Discussion Starter',
+                    icon: 'fa-solid fa-comments',
+                    description: 'Started 5 discussions in peer support forums',
+                    earnedDate: '2023-09-28'
+                },
+                {
+                    id: 'anxiety-expert',
+                    name: 'Anxiety Expert',
+                    icon: 'fa-solid fa-brain',
+                    description: 'Completed the Managing Anxiety module with a perfect score',
+                    earnedDate: '2023-09-10'
+                }
+            ];
+            
+            const availableBadges = [
+                {
+                    id: 'resilience-champion',
+                    name: 'Resilience Champion',
+                    icon: 'fa-solid fa-shield-alt',
+                    description: 'Complete the Building Resilience module with a score of 90% or higher',
+                    criteria: 'Score 90%+ on Building Resilience module'
+                },
+                {
+                    id: 'sleep-guru',
+                    name: 'Sleep Guru',
+                    icon: 'fa-solid fa-moon',
+                    description: 'Complete the Healthy Sleep Habits module and track sleep for 7 consecutive days',
+                    criteria: 'Complete Sleep module + 7 days tracking'
+                },
+                {
+                    id: 'peer-supporter',
+                    name: 'Peer Supporter',
+                    icon: 'fa-solid fa-hands-helping',
+                    description: 'Respond to 10 posts in the peer support forums',
+                    criteria: 'Respond to 10 forum posts'
+                },
+                {
+                    id: 'mindfulness-master',
+                    name: 'Mindfulness Master',
+                    icon: 'fa-solid fa-om',
+                    description: 'Complete all mindfulness exercises in the Stress Management module',
+                    criteria: 'Complete all mindfulness exercises'
+                },
+                {
+                    id: 'consistency-king',
+                    name: 'Consistency Champion',
+                    icon: 'fa-solid fa-calendar-check',
+                    description: 'Log into the platform for 14 consecutive days',
+                    criteria: '14 consecutive days of login'
+                }
+            ];
+            
+            // Render badges
+            function renderBadges() {
+                const earnedBadgesContainer = badgesSection.querySelector('#earned-badges');
+                const availableBadgesContainer = badgesSection.querySelector('#available-badges');
+                
+                if (earnedBadgesContainer) {
+                    if (earnedBadges.length === 0) {
+                        earnedBadgesContainer.innerHTML = '<p class="no-badges-message">You haven\'t earned any badges yet. Complete learning modules and participate in discussions to earn badges!</p>';
+                    } else {
+                        earnedBadgesContainer.innerHTML = earnedBadges.map(badge => `
+                            <div class="badge-card earned">
+                                <div class="badge-icon"><i class="${badge.icon}"></i></div>
+                                <div class="badge-info">
+                                    <h3>${badge.name}</h3>
+                                    <p>${badge.description}</p>
+                                    <p class="earned-date">Earned on ${new Date(badge.earnedDate).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+                
+                if (availableBadgesContainer) {
+                    availableBadgesContainer.innerHTML = availableBadges.map(badge => `
+                        <div class="badge-card available">
+                            <div class="badge-icon"><i class="${badge.icon}"></i></div>
+                            <div class="badge-info">
+                                <h3>${badge.name}</h3>
+                                <p>${badge.description}</p>
+                                <div class="badge-criteria">
+                                    <span>How to earn:</span> ${badge.criteria}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            // Check for new badges when modules are completed
+            document.addEventListener('moduleCompleted', function(e) {
+                const moduleData = e.detail;
+                console.log('Module completed:', moduleData);
+                
+                // Check if this completion earns any badges
+                if (moduleData.name === 'Building Resilience' && moduleData.score >= 90) {
+                    awardBadge('resilience-champion');
+                }
+                
+                if (moduleData.name === 'Healthy Sleep Habits') {
+                    // This would normally check for 7 days of tracking
+                    // For demo purposes, we'll just show a notification
+                    showNotification('You\'re on your way to earning the Sleep Guru badge! Track your sleep for 7 days to earn it.');
+                }
+                
+                // Check if all modules are completed for Module Master badge
+                const allModulesCompleted = true; // This would normally check the actual data
+                if (allModulesCompleted) {
+                    awardBadge('module-master');
+                }
+            });
+            
+            // Function to award a badge
+            function awardBadge(badgeId) {
+                const badge = availableBadges.find(b => b.id === badgeId);
+                if (!badge) return;
+                
+                // Check if already earned
+                if (earnedBadges.some(b => b.id === badgeId)) return;
+                
+                // Add to earned badges
+                const newBadge = {
+                    ...badge,
+                    earnedDate: new Date().toISOString().split('T')[0]
+                };
+                
+                earnedBadges.push(newBadge);
+                
+                // Remove from available badges
+                const badgeIndex = availableBadges.findIndex(b => b.id === badgeId);
+                if (badgeIndex !== -1) {
+                    availableBadges.splice(badgeIndex, 1);
+                }
+                
+                // Update the UI
+                renderBadges();
+                
+                // Show notification
+                showNotification(`Congratulations! You've earned the ${badge.name} badge!`);
+            }
+            
+            // Function to show notification
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification badge-notification';
+                notification.innerHTML = `
+                    <div class="notification-icon"><i class="fa-solid fa-award"></i></div>
+                    <div class="notification-content">${message}</div>
+                    <button class="notification-close"><i class="fa-solid fa-times"></i></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Add animation class after a small delay to trigger animation
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // Remove notification after 5 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300); // Wait for fade out animation
+                }, 5000);
+                
+                // Close button functionality
+                const closeBtn = notification.querySelector('.notification-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 300);
+                    });
+                }
+            }
+            
+            // Initialize badges display
+            renderBadges();
+            
+            // For demo purposes: simulate earning a badge after 10 seconds
+            setTimeout(() => {
+                if (!earnedBadges.some(b => b.id === 'peer-supporter')) {
+                    awardBadge('peer-supporter');
+                }
+            }, 10000);
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             init();
@@ -3997,6 +4347,17 @@
             setupCounsellingFunctionality();
             setupReportFunctionality();
             setupFacultyResources();
+            setupBadgesFunctionality();
+            
+            // Handle badges link click
+            const badgesLink = profileDropdown.querySelector('[data-view="badges"]');
+            if (badgesLink) {
+                badgesLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showContent('badges');
+                    profileDropdown.classList.remove('show');
+                });
+            }
         });
     </script>
 </body>
